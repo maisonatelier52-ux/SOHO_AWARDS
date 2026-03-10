@@ -1,0 +1,13 @@
+{
+  "name": "soho-awards-live-site",
+  "private": true,
+  "version": "1.0.0",
+  "description": "SOHO Awards 2026 live website bundle with serverless form handlers.",
+  "scripts": {
+    "build:sitemap": "node scripts/generate-sitemap.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16",
+    "postgres": "^3.4.7"
+  }
+}

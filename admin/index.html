@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOHO Awards Ops Dashboard</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#0f4f43">
+  <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <div class="container">
+      <div class="admin-topbar">
+        <div>
+          <div class="eyebrow">Internal ops</div>
+          <h1 style="font-size:clamp(2rem,3vw,3.2rem);">SOHO Awards dashboard</h1>
+          <p class="lead" style="margin:0;max-width:75ch;">Internal workspace for nominations, payment verification state, privacy/grievance tickets, partner inquiries, and audit activity.</p>
+        </div>
+        <div class="meta-row">
+          <span class="badge">SOHO Awards 2026</span>
+          <a class="btn btn-secondary" href="../index.html">Back to website</a>
+        </div>
+      </div>
+
+      <div id="adminStatus" class="status-box" aria-live="polite"></div>
+
+      <div class="admin-grid">
+        <aside class="admin-stack">
+          <section class="admin-panel">
+            <h2 style="font-size:1.25rem;">Admin access</h2>
+            <p class="muted">Use the internal API key configured in <code>ADMIN_API_KEY</code>. This key is stored in sessionStorage for this browser session only.</p>
+            <form id="adminLoginForm" class="form-grid single">
+              <div>
+                <label class="admin-label" for="adminName">Display name</label>
+                <input class="admin-input" id="adminName" name="adminName" placeholder="Ops Lead" required>
+              </div>
+              <div>
+                <label class="admin-label" for="adminEmail">Work email</label>
+                <input class="admin-input" id="adminEmail" name="adminEmail" type="email" placeholder="ops@sohoawards.com">
+              </div>
+              <div>
+                <label class="admin-label" for="adminApiKey">Admin API key</label>
+                <input class="admin-input" id="adminApiKey" name="adminApiKey" type="password" placeholder="Paste ADMIN_API_KEY" required>
+              </div>
+              <div class="button-row" style="margin-top:0;">
+                <button class="btn btn-primary" type="submit">Connect dashboard</button>
+                <button class="btn btn-ghost" type="button" id="adminLogoutButton">Clear session</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="admin-panel">
+            <h3>Escalation rules</h3>
+            <ul>
+              <li><strong>P1:</strong> public exposure, compromised account, wrong winner/public listing, unauthorized disclosure.</li>
+              <li><strong>P2:</strong> public-content takedown, reputational correction, regulated-sector verification hold.</li>
+              <li><strong>P3:</strong> standard correction, nomination withdrawal, partner inquiry follow-up.</li>
+            </ul>
+            <p class="admin-footer-note">Pair this page with the operating pack’s escalation matrix and canned email templates.</p>
+          </section>
+        </aside>
+
+        <section class="admin-stack">
+          <section class="admin-panel">
+            <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap;">
+              <div>
+                <h2 style="font-size:1.3rem;">Live overview</h2>
+                <p class="muted">Counts refresh from the database-backed serverless APIs.</p>
+              </div>
+              <div class="button-row" style="margin-top:0;">
+                <button class="btn btn-secondary" id="refreshDashboardButton" type="button">Refresh data</button>
+              </div>
+            </div>
+            <div class="metrics-grid" id="metricsGrid">
+              <div class="metric-card"><strong>—</strong><span>Loading metrics</span></div>
+            </div>
+          </section>
+
+          <section class="admin-panel">
+            <div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap;">
+              <div>
+                <h2 style="font-size:1.25rem;">Nominations</h2>
+                <p class="muted">Filter, review, and update the nomination pipeline.</p>
+              </div>
+            </div>
+            <form id="nominationFilterForm" class="filter-row">
+              <div>
+                <label class="admin-label" for="nominationQuery">Search</label>
+                <input class="admin-input" id="nominationQuery" name="q" placeholder="Reference, company, category, or email">
+              </div>
+              <div>
+                <label class="admin-label" for="nominationStatusFilter">Status</label>
+                <select class="admin-input" id="nominationStatusFilter" name="status">
+                  <option value="">All</option>
+                  <option value="submitted">Submitted</option>
+                  <option value="shortlisted">Shortlisted</option>
+                  <option value="finalist">Finalist</option>
+                  <option value="winner">Winner</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="withdrawn">Withdrawn</option>
+                </select>
+              </div>
+              <div>
+                <label class="admin-label" for="nominationScreeningFilter">Screening</label>
+                <select class="admin-input" id="nominationScreeningFilter" name="screeningStatus">
+                  <option value="">All</option>
+                  <option value="payment_verified">Payment verified</option>
+                  <option value="screening_pending">Screening pending</option>
+                  <option value="verification_hold">Verification hold</option>
+                  <option value="ready_for_jury">Ready for jury</option>
+                  <option value="jury_review">Jury review</option>
+                  <option value="closed">Closed</option>
+                </select>
+              </div>
+              <div>
+                <button class="btn btn-primary" type="submit">Apply</button>
+              </div>
+            </form>
+            <div class="table-wrap" style="margin-top:1rem;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Applicant</th>
+                    <th>Category</th>
+                    <th>Payment</th>
+                    <th>Workflow</th>
+                    <th>Update</th>
+                  </tr>
+                </thead>
+                <tbody id="nominationsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel">
+            <h2 style="font-size:1.25rem;">Payments ledger</h2>
+            <form id="paymentFilterForm" class="filter-row">
+              <div>
+                <label class="admin-label" for="paymentQuery">Search</label>
+                <input class="admin-input" id="paymentQuery" name="q" placeholder="Order, payment, legal name, email">
+              </div>
+              <div>
+                <label class="admin-label" for="paymentProviderFilter">Gateway</label>
+                <select class="admin-input" id="paymentProviderFilter" name="provider">
+                  <option value="">All</option>
+                  <option value="razorpay">Razorpay</option>
+                  <option value="cashfree">Cashfree</option>
+                </select>
+              </div>
+              <div>
+                <label class="admin-label" for="paymentStatusFilter">Verification</label>
+                <select class="admin-input" id="paymentStatusFilter" name="verificationStatus">
+                  <option value="">All</option>
+                  <option value="order_created">Order created</option>
+                  <option value="verified">Verified</option>
+                  <option value="linked_to_nomination">Linked to nomination</option>
+                  <option value="webhook_paid">Webhook paid</option>
+                  <option value="failed">Failed</option>
+                  <option value="refunded">Refunded</option>
+                </select>
+              </div>
+              <div>
+                <button class="btn btn-primary" type="submit">Apply</button>
+              </div>
+            </form>
+            <div class="table-wrap" style="margin-top:1rem;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Gateway</th>
+                    <th>Order / Payment</th>
+                    <th>Applicant</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Timeline</th>
+                  </tr>
+                </thead>
+                <tbody id="paymentsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel">
+            <h2 style="font-size:1.25rem;">Privacy & grievance tickets</h2>
+            <form id="privacyFilterForm" class="filter-row">
+              <div>
+                <label class="admin-label" for="privacyQuery">Search</label>
+                <input class="admin-input" id="privacyQuery" name="q" placeholder="Reference, requester, email, request type">
+              </div>
+              <div>
+                <label class="admin-label" for="privacyStatusFilter">Status</label>
+                <select class="admin-input" id="privacyStatusFilter" name="status">
+                  <option value="">All</option>
+                  <option value="new">New</option>
+                  <option value="acknowledged">Acknowledged</option>
+                  <option value="awaiting_verification">Awaiting verification</option>
+                  <option value="in_review">In review</option>
+                  <option value="awaiting_internal_action">Awaiting internal action</option>
+                  <option value="awaiting_requester_response">Awaiting requester response</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div>
+                <label class="admin-label" for="privacyPriorityFilter">Priority</label>
+                <select class="admin-input" id="privacyPriorityFilter" name="priority">
+                  <option value="">All</option>
+                  <option value="p1">P1</option>
+                  <option value="p2">P2</option>
+                  <option value="p3">P3</option>
+                </select>
+              </div>
+              <div>
+                <button class="btn btn-primary" type="submit">Apply</button>
+              </div>
+            </form>
+            <div class="table-wrap" style="margin-top:1rem;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Requester</th>
+                    <th>Request</th>
+                    <th>Flags</th>
+                    <th>Workflow</th>
+                    <th>Update</th>
+                  </tr>
+                </thead>
+                <tbody id="privacyTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel">
+            <h2 style="font-size:1.25rem;">Partner inquiries</h2>
+            <form id="partnerFilterForm" class="filter-row">
+              <div>
+                <label class="admin-label" for="partnerQuery">Search</label>
+                <input class="admin-input" id="partnerQuery" name="q" placeholder="Reference, company, contact, email">
+              </div>
+              <div>
+                <label class="admin-label" for="partnerStatusFilter">Status</label>
+                <select class="admin-input" id="partnerStatusFilter" name="status">
+                  <option value="">All</option>
+                  <option value="new">New</option>
+                </select>
+              </div>
+              <div></div>
+              <div>
+                <button class="btn btn-primary" type="submit">Apply</button>
+              </div>
+            </form>
+            <div class="table-wrap" style="margin-top:1rem;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Reference</th>
+                    <th>Company</th>
+                    <th>Contact</th>
+                    <th>Interest</th>
+                    <th>Message</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody id="partnersTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel">
+            <h2 style="font-size:1.25rem;">Audit stream</h2>
+            <div class="table-wrap">
+              <table class="admin-table" style="min-width:760px;">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Entity</th>
+                    <th>Action</th>
+                    <th>Actor</th>
+                    <th>Metadata</th>
+                  </tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/admin.js"></script>
+</body>
+</html>
