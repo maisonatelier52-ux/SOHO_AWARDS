@@ -1,6 +1,6 @@
 window.SOHO_CONFIG = {
   siteUrl: "https://sohoawards.com",
-  nominationUrl: "/soho_awards_site_live/nomination-form.html",
+  nominationUrl: "/nomination-form.html",
   nominationEndpoint: "/api/nominations",
   nominationFeeInr: 100,
   nominationPaymentProvider: "razorpay",
@@ -9,7 +9,7 @@ window.SOHO_CONFIG = {
   nominationPaymentCreateOrderEndpoint: "/api/payments/create-order",
   nominationPaymentVerifyEndpoint: "/api/payments/verify",
   nominationPaymentReturnPath: "/nomination-form.html",
-  partnerDeckUrl: "/soho_awards_site_live/partner-inquiry.html",
+  partnerDeckUrl: "/partner-inquiry.html",
   adminDashboardUrl: "/admin/",
   adminDashboardEndpoint: "/api/admin/dashboard",
   adminNominationsEndpoint: "/api/admin/nominations",
