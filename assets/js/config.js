@@ -2,7 +2,7 @@ window.SOHO_CONFIG = {
   siteUrl: "https://sohoawards.com",
   nominationUrl: "/nomination-form.html",
   nominationEndpoint: "/api/nominations",
-  nominationFeeInr: 100,
+  nominationFeeInr: 75000,
   nominationPaymentProvider: "razorpay",
   nominationPaymentProviders: ["razorpay", "cashfree"],
   nominationPaymentMode: "test",
